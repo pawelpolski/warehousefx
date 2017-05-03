@@ -4,8 +4,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import polskipawel.model.Equipment;
 import polskipawel.model.Model;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
@@ -51,6 +56,9 @@ public class Controller {
 
     public Model model;
 
+    @FXML
+    public Button exportToExcel;
+
     public Controller() {
         model = new Model();
     }
@@ -62,6 +70,7 @@ public class Controller {
             initializeTableData();
         } else {
             addNewEquipment();
+
         }
     }
 
@@ -167,8 +176,13 @@ public class Controller {
                 textField.setText("");
                 initializeAndAddButton.setDisable(false);
                 informationLabel.setText("");
+
             }
         }
 
+    }
+
+    public void exportToExcel(ActionEvent actionEvent) throws Exception {
+        model.writeExcel();
     }
 }

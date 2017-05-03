@@ -3,6 +3,11 @@ package polskipawel.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.Writer;
+
 /**
  * Created by macbook on 01.05.2017.
  */
@@ -41,5 +46,28 @@ public class Model {
 
     public void setEquipments(ObservableList<Equipment> equipments) {
         this.equipments = equipments;
+
+    }
+    public void writeExcel() throws Exception {
+        Writer writer = null;
+        try {
+            File file = new File("Equipments.csv");
+            writer = new BufferedWriter(new FileWriter(file));
+            String columns = "ID,Serial Number,Type,Status\n";
+            writer.write(columns);
+            for (Equipment equipment : equipments) {
+
+                String text = equipment.getId() + "," + equipment.getSerialNumber() + ","+equipment.getType()+","+equipment.getStatus()  + "\n";
+
+                writer.write(text);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        finally {
+
+            writer.flush();
+            writer.close();
+        }
     }
 }
