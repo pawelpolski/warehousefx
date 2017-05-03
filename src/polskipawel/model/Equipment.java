@@ -1,4 +1,6 @@
-package sample;
+package polskipawel.model;
+
+import java.util.Date;
 
 /**
  * Created by macbook on 01.05.2017.
@@ -8,13 +10,13 @@ public class Equipment {
     private int id;
     private String serialNumber;
     private String type;
+    private String status;
 
-
-    public Equipment(int id, String serialNumber, String type){
+    public Equipment(int id, String serialNumber, String type, String status){
         this.id = id;
         this.serialNumber = serialNumber;
         this.type = type;
-
+        this.status = status;
     }
 
     public int getId() {
@@ -39,5 +41,13 @@ public class Equipment {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
