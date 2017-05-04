@@ -1,25 +1,13 @@
 package polskipawel.controller;
 
-import com.sun.prism.impl.Disposer;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import polskipawel.model.Equipment;
 import polskipawel.model.Model;
-
 import java.io.*;
-import java.lang.reflect.Array;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-
-import static javafx.scene.control.ButtonType.NO;
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.RED;
 
@@ -27,56 +15,46 @@ public class Controller {
 
     public Model model;
 
+    public Controller() {
+        model = new Model();
+
+    }
+
+
     @FXML
     public Button initializeAndAddButton;
-
     @FXML
     public Button editAndSaveButton;
-
     @FXML
     public Button cancelAndRemoveButton;
-
     @FXML
     public Label informationLabel;
-
     @FXML
     public ChoiceBox typeChoiseField;
-
     @FXML
     public TextField textField;
-
     @FXML
     public TableView table;
-
     @FXML
     public TableColumn id;
-
     @FXML
     public TableColumn serialNumber;
-
     @FXML
     public TableColumn type;
-
     @FXML
     public TableColumn status;
-
     @FXML
     public Button exportToExcel;
-
     @FXML
     public TextField filterField;
-
     @FXML
     public Button filterButton;
     @FXML
     public TextArea textArea;
-
     @FXML
     public Button addFromTextArea;
 
-    public Controller() {
-        model = new Model();
-    }
+
 
 
     @FXML
@@ -231,7 +209,8 @@ public class Controller {
                     filterButton.setText("Clear filter");
                     model.getFilteredEquipments().clear();
                     for (int i = 0; i < model.getEquipments().size(); i++) {
-                        if (filterField.getText().equals(model.getEquipments().get(i).getType())) {
+                        int charLength = filterField.getLength();
+                        if (filterField.getText().substring(0,charLength).toLowerCase().equals(model.getEquipments().get(i).getType().substring(0,charLength).toLowerCase())) {
                             model.getFilteredEquipments().addAll(model.getEquipments().get(i));
                         }
                     }
