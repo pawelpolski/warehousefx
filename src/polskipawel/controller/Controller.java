@@ -6,8 +6,12 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import polskipawel.model.Model;
-import java.io.*;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Optional;
+
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.RED;
 
@@ -55,8 +59,6 @@ public class Controller {
     public Button addFromTextArea;
 
 
-
-
     @FXML
     public void initializeAndAddButton(ActionEvent actionEvent) throws IOException {
         if (initializeAndAddButton.getText().equals("Initialize data")) {
@@ -69,7 +71,7 @@ public class Controller {
             for (int i = 0; i < tempList.length; i++) {
                 String cos = tempList[i].toString();
                 String[] cos2 = cos.split(",");
-                model.addEquipment(Integer.parseInt(cos2[0]),cos2[1],cos2[2],cos2[3]);
+                model.addEquipment(Integer.parseInt(cos2[0]), cos2[1], cos2[2], cos2[3]);
             }
             initializeTableData();
 
@@ -90,7 +92,7 @@ public class Controller {
         type.setCellValueFactory(new PropertyValueFactory<>("type"));
         status.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        typeChoiseField.getItems().addAll("Modem", "Router", "Horizon DVR High","Horizon DVR Low","Horizon HD High", "Mediamodul CI+", "Pace DCR7111", "Cisco HD8685");
+        typeChoiseField.getItems().addAll("Modem", "Router", "Horizon DVR High", "Horizon DVR Low", "Horizon HD High", "Mediamodul CI+", "Pace DCR7111", "Cisco HD8685");
         table.setItems(model.getEquipments());
         initializeAndAddButton.setText("Add equipment");
         typeChoiseField.setValue("");
@@ -117,7 +119,7 @@ public class Controller {
 
     public void editAndSaveButton(ActionEvent actionEvent) {
         try {
-            if(editAndSaveButton.getText().equals("Edit")) {
+            if (editAndSaveButton.getText().equals("Edit")) {
                 informationLabel.setText("");
                 int selectionId = table.getSelectionModel().getSelectedIndex();
                 textField.setText(model.getEquipments().get(selectionId).getSerialNumber());
@@ -126,7 +128,7 @@ public class Controller {
                 table.setDisable(true);
                 initializeAndAddButton.setDisable(true);
                 cancelAndRemoveButton.setText("Cancel");
-            }else{ // save pressed
+            } else { // save pressed
                 if (textField.getText().equals("") || typeChoiseField.getValue().toString().equals("")) {
                     informationLabel.setTextFill(RED);
                     informationLabel.setText("You have to write serial number and it's type!");
@@ -142,18 +144,18 @@ public class Controller {
                     textField.setText("");
                     initializeAndAddButton.setDisable(false);
                     informationLabel.setTextFill(GREEN);
-                    informationLabel.setText("Equipment ID: "+ model.getEquipments().get(selectionId).getId()+" edited correctly.");
+                    informationLabel.setText("Equipment ID: " + model.getEquipments().get(selectionId).getId() + " edited correctly.");
 
                 }
             }
-        } catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e) {
             informationLabel.setTextFill(RED);
             informationLabel.setText("If you want to edit, you have to select row!");
         }
     }
 
     public void cancelAndRemoveButton(ActionEvent actionEvent) {
-        if (table.getSelectionModel().getSelectedIndex() < 0){
+        if (table.getSelectionModel().getSelectedIndex() < 0) {
             informationLabel.setTextFill(RED);
             informationLabel.setText("If you want to remove, select row!");
 
@@ -163,7 +165,7 @@ public class Controller {
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 int selectionId = table.getSelectionModel().getSelectedIndex();
                 alert.setTitle("Remove button pressed");
-                alert.setHeaderText("Equipment ID: "+model.getEquipments().get(selectionId).getId()+" will be removed");
+                alert.setHeaderText("Equipment ID: " + model.getEquipments().get(selectionId).getId() + " will be removed");
 
                 Optional<ButtonType> result = alert.showAndWait();
                 if (result.get() == ButtonType.OK) {
@@ -185,6 +187,7 @@ public class Controller {
         }
 
     }
+
     public void fieldsDisabler(boolean trueOrFalse) {
         textField.setDisable(trueOrFalse);
         typeChoiseField.setDisable(trueOrFalse);
@@ -199,26 +202,27 @@ public class Controller {
     }
 
     public void filterDataButton(ActionEvent actionEvent) {
-        if(filterButton.getText().equals("Clear filter") || filterField.getText().equals("")){
+        if (filterButton.getText().equals("Clear filter") || filterField.getText().equals("")) {
             table.setItems(model.getEquipments());
             fieldsDisabler(false);
             filterField.setText("");
             filterButton.setText("Filter data");
-            } else {
-                if (!filterField.getText().isEmpty()) {
-                    filterButton.setText("Clear filter");
-                    model.getFilteredEquipments().clear();
-                    for (int i = 0; i < model.getEquipments().size(); i++) {
-                        int charLength = filterField.getLength();
-                        if (filterField.getText().substring(0,charLength).toLowerCase().equals(model.getEquipments().get(i).getType().substring(0,charLength).toLowerCase())) {
-                            model.getFilteredEquipments().addAll(model.getEquipments().get(i));
-                        }
+        } else {
+            if (!filterField.getText().isEmpty()) {
+                filterButton.setText("Clear filter");
+                model.getFilteredEquipments().clear();
+                for (int i = 0; i < model.getEquipments().size(); i++) {
+                    int charLength = filterField.getLength();
+                    if (filterField.getText().substring(0, charLength).toLowerCase().equals(model.getEquipments().get(i).getType().substring(0, charLength).toLowerCase())) {
+                        model.getFilteredEquipments().addAll(model.getEquipments().get(i));
                     }
-                    table.setItems(model.getFilteredEquipments());
-                    fieldsDisabler(true);
                 }
+                table.setItems(model.getFilteredEquipments());
+                fieldsDisabler(true);
             }
+        }
     }
+
     public void addEquipmentsFromTextArea() {
         String[] rows = textArea.getText().split("\n");
         int rowsSize = rows.length;
