@@ -13,41 +13,57 @@ import java.io.Writer;
  */
 public class Model {
 
+    /**
+     * Equipments list which can be displayed in JavaFX's TableView
+     */
     private ObservableList<Equipment> equipments = FXCollections.observableArrayList();
+
+    /**
+     * Fildered equipments list which can be displayed in JavaFX's TableView when needed.
+     */
+    private ObservableList<Equipment> filteredEquipments = FXCollections.observableArrayList();
 
     public Model() {
 
     }
 
-    public void addStartingEquipments() {
-        equipments.add(new Equipment(1, "179267128194", "Horizon", "in warehouse"));
-        equipments.add(new Equipment(2, "28R281224003", "Router", "in warehouse"));
-        equipments.add(new Equipment(3, "SAAP50421933", "Modem", "in warehouse"));
-    }
-
+    /**
+     * Method alows to add new Equipment to list
+     * @param id Equipment id
+     * @param sn Equipment serialNumber
+     * @param type Equipment type
+     * @param status Equipment status
+     * @return returns updated list of equipments
+     */
     public ObservableList<Equipment> addEquipment(int id, String sn, String type, String status) {
         equipments.add(new Equipment(id, sn, type, status));
         return equipments;
     }
 
+
+    /**
+     * Method finds Equipments list size
+     * @return returns last row from equipment list and it's id.
+     */
     public int getLastId() {
         int i = equipments.size();
         return equipments.get(i - 1).getId();
     }
 
+    /**
+     * Method removes row from Equipments list
+     * @param index index of equipment which is going to be removed
+     * @return returns updeted list, without removed row
+     */
     public ObservableList<Equipment> removeEquipment(int index) {
         equipments.remove(index);
         return equipments;
     }
 
-    public ObservableList<Equipment> getEquipments() {
-        return equipments;
-    }
-
-    public void setEquipments(ObservableList<Equipment> equipments) {
-        this.equipments = equipments;
-
-    }
+    /**
+     * This is method which lets me export Table View list into Equipments.csv
+     * This file is "dataBase-like" for temprary usage until we get to know about data base connections.
+     */
     public void writeExcel() throws Exception {
         Writer writer = null;
         try {
@@ -56,18 +72,36 @@ public class Model {
             String columns = "ID,Serial Number,Type,Status\n";
             writer.write(columns);
             for (Equipment equipment : equipments) {
-
                 String text = equipment.getId() + "," + equipment.getSerialNumber() + ","+equipment.getType()+","+equipment.getStatus()  + "\n";
-
                 writer.write(text);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         finally {
-
             writer.flush();
             writer.close();
         }
+    }
+
+
+
+    /**
+     * Getters and Setters for ObservableLists
+     */
+    public ObservableList<Equipment> getFilteredEquipments() {
+        return filteredEquipments;
+    }
+
+    public void setFilteredEquipments(ObservableList<Equipment> filteredEquipments) {
+        this.filteredEquipments = filteredEquipments;
+    }
+
+    public ObservableList<Equipment> getEquipments() {
+        return equipments;
+    }
+
+    public void setEquipments(ObservableList<Equipment> equipments) {
+        this.equipments = equipments;
     }
 }

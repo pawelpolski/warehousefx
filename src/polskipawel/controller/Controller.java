@@ -1,5 +1,10 @@
 package polskipawel.controller;
 
+import com.sun.prism.impl.Disposer;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -7,11 +12,11 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import polskipawel.model.Equipment;
 import polskipawel.model.Model;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static javafx.scene.control.ButtonType.NO;
@@ -19,6 +24,8 @@ import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.RED;
 
 public class Controller {
+
+    public Model model;
 
     @FXML
     public Button initializeAndAddButton;
@@ -53,11 +60,19 @@ public class Controller {
     @FXML
     public TableColumn status;
 
-
-    public Model model;
-
     @FXML
     public Button exportToExcel;
+
+    @FXML
+    public TextField filterField;
+
+    @FXML
+    public Button filterButton;
+    @FXML
+    public TextArea textArea;
+
+    @FXML
+    public Button addFromTextArea;
 
     public Controller() {
         model = new Model();
@@ -65,9 +80,21 @@ public class Controller {
 
 
     @FXML
-    public void initializeAndAddButton(ActionEvent actionEvent) {
+    public void initializeAndAddButton(ActionEvent actionEvent) throws IOException {
         if (initializeAndAddButton.getText().equals("Initialize data")) {
+
+
+            String CsvFile = "Equipments.csv";
+            BufferedReader CSV = new BufferedReader(new FileReader(CsvFile));
+            String dataRow = CSV.readLine();
+            Object[] tempList = CSV.lines().toArray();
+            for (int i = 0; i < tempList.length; i++) {
+                String cos = tempList[i].toString();
+                String[] cos2 = cos.split(",");
+                model.addEquipment(Integer.parseInt(cos2[0]),cos2[1],cos2[2],cos2[3]);
+            }
             initializeTableData();
+
         } else {
             addNewEquipment();
 
@@ -85,8 +112,7 @@ public class Controller {
         type.setCellValueFactory(new PropertyValueFactory<>("type"));
         status.setCellValueFactory(new PropertyValueFactory<>("status"));
 
-        typeChoiseField.getItems().addAll("Modem", "Horizon", "Router", "CI+");
-        model.addStartingEquipments();
+        typeChoiseField.getItems().addAll("Modem", "Router", "Horizon DVR High","Horizon DVR Low","Horizon HD High", "Mediamodul CI+", "Pace DCR7111", "Cisco HD8685");
         table.setItems(model.getEquipments());
         initializeAndAddButton.setText("Add equipment");
         typeChoiseField.setValue("");
@@ -181,8 +207,49 @@ public class Controller {
         }
 
     }
+    public void fieldsDisabler(boolean trueOrFalse) {
+        textField.setDisable(trueOrFalse);
+        typeChoiseField.setDisable(trueOrFalse);
+        cancelAndRemoveButton.setDisable(trueOrFalse);
+        editAndSaveButton.setDisable(trueOrFalse);
+        initializeAndAddButton.setDisable(trueOrFalse);
+        exportToExcel.setDisable(trueOrFalse);
+    }
 
     public void exportToExcel(ActionEvent actionEvent) throws Exception {
         model.writeExcel();
     }
+
+    public void filterDataButton(ActionEvent actionEvent) {
+        if(filterButton.getText().equals("Clear filter") || filterField.getText().equals("")){
+            table.setItems(model.getEquipments());
+            fieldsDisabler(false);
+            filterField.setText("");
+            filterButton.setText("Filter data");
+            } else {
+                if (!filterField.getText().isEmpty()) {
+                    filterButton.setText("Clear filter");
+                    model.getFilteredEquipments().clear();
+                    for (int i = 0; i < model.getEquipments().size(); i++) {
+                        if (filterField.getText().equals(model.getEquipments().get(i).getType())) {
+                            model.getFilteredEquipments().addAll(model.getEquipments().get(i));
+                        }
+                    }
+                    table.setItems(model.getFilteredEquipments());
+                    fieldsDisabler(true);
+                }
+            }
+    }
+    public void addEquipmentsFromTextArea() {
+        String[] rows = textArea.getText().split("\n");
+        int rowsSize = rows.length;
+        for (int i = 0; i < rowsSize; i++) {
+            table.setItems(model.addEquipment(model.getLastId() + 1, rows[i], typeChoiseField.getValue().toString(), "in warehouse"));
+            textArea.setText("");
+
+
+        }
+    }
+
+
 }

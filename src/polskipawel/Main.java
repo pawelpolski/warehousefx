@@ -8,12 +8,11 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
-
     @Override
     public void start(Stage primaryStage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("view/view.fxml"));
         primaryStage.setTitle("Warehouse in JavaFX");
-        primaryStage.setScene(new Scene(root, 600, 340));
+        primaryStage.setScene(new Scene(root, 710, 640));
         primaryStage.setResizable(false);
         primaryStage.show();
     }

@@ -1,9 +1,8 @@
 package polskipawel.model;
 
-import java.util.Date;
-
 /**
- * Created by macbook on 01.05.2017.
+ * Created by PawelPolski on 01.05.2017.
+ * Equipments class
  */
 public class Equipment {
 
@@ -12,7 +11,7 @@ public class Equipment {
     private String type;
     private String status;
 
-    public Equipment(int id, String serialNumber, String type, String status){
+    public Equipment(int id, String serialNumber, String type, String status) {
         this.id = id;
         this.serialNumber = serialNumber;
         this.type = type;
