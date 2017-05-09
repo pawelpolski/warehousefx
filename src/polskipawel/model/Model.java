@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 
 /**
  * Created by macbook on 01.05.2017.
@@ -23,15 +24,43 @@ public class Model {
      */
     private ObservableList<Equipment> filteredEquipments = FXCollections.observableArrayList();
 
+    /**
+     * Stores equipments types in array list
+     */
+    private ArrayList<String> equipmentsTypes = new ArrayList<>();
+
     public Model() {
 
+        addTypesOfEquipmentsToList();
+
+    }
+
+
+
+
+
+
+    /**
+     * add fixed types of equipments to array list
+     */
+    public void addTypesOfEquipmentsToList() {
+        equipmentsTypes.add("Pace DCR7111");
+        equipmentsTypes.add("Cisco HD8485");
+        equipmentsTypes.add("Cisco HD8685");
+        equipmentsTypes.add("Horizon HD High");
+        equipmentsTypes.add("Horizon DVR High");
+        equipmentsTypes.add("Horizon DVR Low");
+        equipmentsTypes.add("Mediamudul CI+");
+        equipmentsTypes.add("Modem");
+        equipmentsTypes.add("Router");
     }
 
     /**
      * Method alows to add new Equipment to list
-     * @param id Equipment id
-     * @param sn Equipment serialNumber
-     * @param type Equipment type
+     *
+     * @param id     Equipment id
+     * @param sn     Equipment serialNumber
+     * @param type   Equipment type
      * @param status Equipment status
      * @return returns updated list of equipments
      */
@@ -43,6 +72,7 @@ public class Model {
 
     /**
      * Method finds Equipments list size
+     *
      * @return returns last row from equipment list and it's id.
      */
     public int getLastId() {
@@ -52,6 +82,7 @@ public class Model {
 
     /**
      * Method removes row from Equipments list
+     *
      * @param index index of equipment which is going to be removed
      * @return returns updeted list, without removed row
      */
@@ -72,18 +103,16 @@ public class Model {
             String columns = "ID,Serial Number,Type,Status\n";
             writer.write(columns);
             for (Equipment equipment : equipments) {
-                String text = equipment.getId() + "," + equipment.getSerialNumber() + ","+equipment.getType()+","+equipment.getStatus()  + "\n";
+                String text = equipment.getId() + "," + equipment.getSerialNumber() + "," + equipment.getType() + "," + equipment.getStatus() + "\n";
                 writer.write(text);
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-        }
-        finally {
+        } finally {
             writer.flush();
             writer.close();
         }
     }
-
 
 
     /**
@@ -103,5 +132,13 @@ public class Model {
 
     public void setEquipments(ObservableList<Equipment> equipments) {
         this.equipments = equipments;
+    }
+
+    public ArrayList<String> getEquipmentsTypes() {
+        return equipmentsTypes;
+    }
+
+    public void setEquipmentsTypes(ArrayList<String> equipmentsTypes) {
+        this.equipmentsTypes = equipmentsTypes;
     }
 }

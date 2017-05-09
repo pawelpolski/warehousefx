@@ -49,4 +49,6 @@ public class Equipment {
     public void setStatus(String status) {
         this.status = status;
     }
+
+
 }

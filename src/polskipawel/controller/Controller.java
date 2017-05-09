@@ -5,6 +5,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
+import polskipawel.model.Equipment;
 import polskipawel.model.Model;
 
 import java.io.BufferedReader;
@@ -23,7 +25,6 @@ public class Controller {
         model = new Model();
 
     }
-
 
     @FXML
     public Button initializeAndAddButton;
@@ -59,67 +60,30 @@ public class Controller {
     public Button addFromTextArea;
 
 
-    @FXML
+    /**
+     * This button listnes for action and Initialize data to table view, or adds new equipment
+     */
     public void initializeAndAddButton(ActionEvent actionEvent) throws IOException {
         if (initializeAndAddButton.getText().equals("Initialize data")) {
 
+            getDataFromFileAndAddToTableList();
+            initializeTableDataFromList();
+            filterField.setDisable(false);
 
-            String CsvFile = "Equipments.csv";
-            BufferedReader CSV = new BufferedReader(new FileReader(CsvFile));
-            String dataRow = CSV.readLine();
-            Object[] tempList = CSV.lines().toArray();
-            for (int i = 0; i < tempList.length; i++) {
-                String cos = tempList[i].toString();
-                String[] cos2 = cos.split(",");
-                model.addEquipment(Integer.parseInt(cos2[0]), cos2[1], cos2[2], cos2[3]);
-            }
-            initializeTableData();
+        } else { //Button has "Add equipment" value
 
-        } else {
             addNewEquipment();
 
         }
     }
 
-    public void initializeTableData() {
-        editAndSaveButton.setDisable(false);
-        cancelAndRemoveButton.setDisable(false);
-        textField.setDisable(false);
-        typeChoiseField.setDisable(false);
 
-        id.setCellValueFactory(new PropertyValueFactory<>("id"));
-        serialNumber.setCellValueFactory(new PropertyValueFactory<>("serialNumber"));
-        type.setCellValueFactory(new PropertyValueFactory<>("type"));
-        status.setCellValueFactory(new PropertyValueFactory<>("status"));
-
-        typeChoiseField.getItems().addAll("Modem", "Router", "Horizon DVR High", "Horizon DVR Low", "Horizon HD High", "Mediamodul CI+", "Pace DCR7111", "Cisco HD8685");
-        table.setItems(model.getEquipments());
-        initializeAndAddButton.setText("Add equipment");
-        typeChoiseField.setValue("");
-        table.centerShapeProperty();
-        type.setStyle("-fx-alignment: CENTER");
-        status.setStyle("-fx-alignment: CENTER");
-        serialNumber.setStyle("-fx-alignment: CENTER");
-        id.setStyle("-fx-alignment: CENTER");
-    }
-
-    public void addNewEquipment() {
-        informationLabel.setText("");
-
-        if (textField.getText().equals("") || typeChoiseField.getValue().toString().equals("")) {
-            informationLabel.setTextFill(RED);
-            informationLabel.setText("You have to write serial number and it's type!");
-        } else {
-            table.setItems(model.addEquipment(model.getLastId() + 1, textField.getText(), typeChoiseField.getValue().toString(), "in warehouse"));
-            textField.setText("");
-            informationLabel.setTextFill(GREEN);
-            informationLabel.setText("Equipment has been added correctly!");
-        }
-    }
-
+    /**
+     * Equipment can be edited via this button, you have to select row then type correct values and save/cancel
+     */
     public void editAndSaveButton(ActionEvent actionEvent) {
         try {
-            if (editAndSaveButton.getText().equals("Edit")) {
+            if (editAndSaveButton.getText().equals("Edit")) { //edit button is presed
                 informationLabel.setText("");
                 int selectionId = table.getSelectionModel().getSelectedIndex();
                 textField.setText(model.getEquipments().get(selectionId).getSerialNumber());
@@ -127,8 +91,11 @@ public class Controller {
                 editAndSaveButton.setText("Save");
                 table.setDisable(true);
                 initializeAndAddButton.setDisable(true);
+                exportToExcel.setDisable(true);
+                filterButton.setDisable(true);
+                addFromTextArea.setDisable(true);
                 cancelAndRemoveButton.setText("Cancel");
-            } else { // save pressed
+            } else { // save button pressed
                 if (textField.getText().equals("") || typeChoiseField.getValue().toString().equals("")) {
                     informationLabel.setTextFill(RED);
                     informationLabel.setText("You have to write serial number and it's type!");
@@ -142,10 +109,9 @@ public class Controller {
                     editAndSaveButton.setText("Edit");
                     cancelAndRemoveButton.setText("Remove");
                     textField.setText("");
-                    initializeAndAddButton.setDisable(false);
+                    fieldsAndButtonsDisabler(false);
                     informationLabel.setTextFill(GREEN);
                     informationLabel.setText("Equipment ID: " + model.getEquipments().get(selectionId).getId() + " edited correctly.");
-
                 }
             }
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -154,13 +120,17 @@ public class Controller {
         }
     }
 
+
+    /**
+     * if remove/cancel button is pressed, equipment can be removed, after remove button pressed confirmation box will appear
+     */
     public void cancelAndRemoveButton(ActionEvent actionEvent) {
         if (table.getSelectionModel().getSelectedIndex() < 0) {
             informationLabel.setTextFill(RED);
             informationLabel.setText("If you want to remove, select row!");
 
         } else {
-            if (cancelAndRemoveButton.getText().equals("Remove")) {
+            if (cancelAndRemoveButton.getText().equals("Remove")) { //remove button is pressed
 
                 Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 int selectionId = table.getSelectionModel().getSelectedIndex();
@@ -188,50 +158,172 @@ public class Controller {
 
     }
 
-    public void fieldsDisabler(boolean trueOrFalse) {
+
+    /**
+     * Creates new list of equipments based on type filter, just to see how many equipments of type we have
+     * no need to input excactly the same type, can be lowercase, half word
+     */
+    public void filterTypes(KeyEvent keyEvent) {
+
+        filterButton.setText("Clear filter");
+        model.getFilteredEquipments().clear();
+
+        for (Equipment equipment : model.getEquipments()) {
+
+            String type = equipment.getType().toLowerCase();
+            String typeField = filterField.getText().toLowerCase();
+
+            try {
+                if (type.contains(typeField))
+                    model.getFilteredEquipments().addAll(equipment);
+            } catch (StringIndexOutOfBoundsException e) {
+
+            }
+        }
+
+        table.setItems(model.getFilteredEquipments());
+        int numberEquipmentsOfThisType = model.getFilteredEquipments().size();
+        fieldsAndButtonsDisabler(true);
+        filterButton.setDisable(false);
+        informationLabel.setText("On warehouse there is: " + numberEquipmentsOfThisType + " equipment of this Type");
+    }
+
+
+    /**
+     * leave filter mode and change buttons
+     */
+    public void filterDataButton(ActionEvent actionEvent) {
+        table.setItems(model.getEquipments());
+        fieldsAndButtonsDisabler(false);
+        filterField.setText("");
+        filterButton.setText("Filter data");
+        clearAllFields();
+    }
+
+
+    /**
+     * if you have alot of equipments which has the same type and want to add them quickly you can use this method
+     * to add all from text area, return button is spliterator, so excelent for barcode reader
+     */
+    public void addEquipmentsFromTextArea() {
+        try {
+            if (textArea.getText().isEmpty() || textArea.getText().length() < 9) {
+                informationLabel.setTextFill(RED);
+                informationLabel.setText("Please enter a few correct serial numbers!");
+            } else {
+                String[] rows = textArea.getText().split("\n");
+
+                for (String equipment : rows){
+                    table.setItems(model.addEquipment(model.getLastId() + 1, equipment, typeChoiseField.getValue().toString(), "in warehouse"));
+                    clearAllFields();
+                    informationLabel.setTextFill(GREEN);
+                    informationLabel.setText("Equipment has been added correctly!");
+                }
+            }
+        } catch (NullPointerException e) {
+            informationLabel.setTextFill(RED);
+            informationLabel.setText("Choose equipment type");
+        }
+    }
+
+
+    /**
+     * add new equipment to list and table, checks if all inputs are correct - not empty, gives information to user
+     */
+    public void addNewEquipment() {
+        informationLabel.setText("");
+        try {
+            if (textField.getText().equals("") || textField.getText().length() < 9) {
+                informationLabel.setTextFill(RED);
+                informationLabel.setText("You have to write correct serial number (Minimum 9 chars)!");
+            } else {
+                table.setItems(model.addEquipment(model.getLastId() + 1, textField.getText(), typeChoiseField.getValue().toString(), "in warehouse"));
+                textField.setText("");
+                informationLabel.setTextFill(GREEN);
+                informationLabel.setText("Equipment has been added correctly!");
+            }
+        } catch (NullPointerException e) {
+            informationLabel.setTextFill(RED);
+            informationLabel.setText("Choose equipment type");
+        }
+    }
+
+    /**
+     * Initialioze data from equipments list to table and changes status of buttons, fields
+     */
+    public void initializeTableDataFromList() {
+        fieldsAndButtonsDisabler(false);
+        clearAllFields();
+        id.setCellValueFactory(new PropertyValueFactory<>("id"));
+        serialNumber.setCellValueFactory(new PropertyValueFactory<>("serialNumber"));
+        type.setCellValueFactory(new PropertyValueFactory<>("type"));
+        status.setCellValueFactory(new PropertyValueFactory<>("status"));
+        makeTableViewCentered();
+        typeChoiseField.getItems().addAll(model.getEquipmentsTypes());
+        table.setItems(model.getEquipments());
+        initializeAndAddButton.setText("Add equipment");
+    }
+
+    /**
+     * Sets style for table to be centered
+     */
+    public void makeTableViewCentered() {
+        table.centerShapeProperty();
+        type.setStyle("-fx-alignment: CENTER");
+        status.setStyle("-fx-alignment: CENTER");
+        serialNumber.setStyle("-fx-alignment: CENTER");
+        id.setStyle("-fx-alignment: CENTER");
+    }
+
+    /**
+     * Gets rows from Equipments.csv file which is our temporary database, and store each one in Equipment list
+     */
+    public void getDataFromFileAndAddToTableList() throws IOException {
+        BufferedReader csvFile = new BufferedReader(new FileReader("Equipments.csv"));
+        String mainRow = csvFile.readLine();
+        Object[] tempList = csvFile.lines().toArray();
+        for (int i = 0; i < tempList.length; i++) {
+            String row = tempList[i].toString();
+            String[] splitedRow = row.split(",");
+            model.addEquipment(Integer.parseInt(splitedRow[0]), splitedRow[1], splitedRow[2], splitedRow[3]);
+        }
+    }
+
+    /**
+     * Listner for excel (csv file) button action, if pressed starts method from model which saves table view into file
+     *
+     * @param actionEvent
+     */
+    public void exportToExcel(ActionEvent actionEvent) throws Exception {
+        model.writeExcel();
+        informationLabel.setText("Saved table to CSV file!");
+    }
+
+
+    /**
+     * Clears all values in inputs fields label, and choice field
+     */
+    public void clearAllFields() {
+        textArea.setText("");
+        textField.setText("");
+        filterField.setText("");
+        informationLabel.setText("");
+    }
+
+    /**
+     * Disable or enable fields and buttons depends on ststus
+     *
+     * @param trueOrFalse if true then fields are disabled
+     */
+    public void fieldsAndButtonsDisabler(boolean trueOrFalse) {
         textField.setDisable(trueOrFalse);
         typeChoiseField.setDisable(trueOrFalse);
         cancelAndRemoveButton.setDisable(trueOrFalse);
         editAndSaveButton.setDisable(trueOrFalse);
         initializeAndAddButton.setDisable(trueOrFalse);
         exportToExcel.setDisable(trueOrFalse);
-    }
-
-    public void exportToExcel(ActionEvent actionEvent) throws Exception {
-        model.writeExcel();
-    }
-
-    public void filterDataButton(ActionEvent actionEvent) {
-        if (filterButton.getText().equals("Clear filter") || filterField.getText().equals("")) {
-            table.setItems(model.getEquipments());
-            fieldsDisabler(false);
-            filterField.setText("");
-            filterButton.setText("Filter data");
-        } else {
-            if (!filterField.getText().isEmpty()) {
-                filterButton.setText("Clear filter");
-                model.getFilteredEquipments().clear();
-                for (int i = 0; i < model.getEquipments().size(); i++) {
-                    int charLength = filterField.getLength();
-                    if (filterField.getText().substring(0, charLength).toLowerCase().equals(model.getEquipments().get(i).getType().substring(0, charLength).toLowerCase())) {
-                        model.getFilteredEquipments().addAll(model.getEquipments().get(i));
-                    }
-                }
-                table.setItems(model.getFilteredEquipments());
-                fieldsDisabler(true);
-            }
-        }
-    }
-
-    public void addEquipmentsFromTextArea() {
-        String[] rows = textArea.getText().split("\n");
-        int rowsSize = rows.length;
-        for (int i = 0; i < rowsSize; i++) {
-            table.setItems(model.addEquipment(model.getLastId() + 1, rows[i], typeChoiseField.getValue().toString(), "in warehouse"));
-            textArea.setText("");
-
-
-        }
+        addFromTextArea.setDisable(trueOrFalse);
+        filterButton.setDisable(trueOrFalse);
     }
 
 
