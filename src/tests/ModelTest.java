@@ -11,6 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class ModelTest {
 
+
+    /**
+     * tthis is class which tests methods from model
+     */
+
+
     @org.junit.jupiter.api.Test
     void addTypesOfEquipmentsToList() {
 

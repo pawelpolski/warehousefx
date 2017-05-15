@@ -3,9 +3,13 @@ package polskipawel.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyEvent;
+import javafx.stage.Stage;
 import polskipawel.model.Equipment;
 import polskipawel.model.Model;
 
@@ -59,7 +63,17 @@ public class Controller {
     @FXML
     public Button addFromTextArea;
 
+    /**
+     * view javafx initialization
+     */
 
+    public Stage startView(Stage primaryStage) throws IOException {
+        Parent root = FXMLLoader.load(getClass().getResource("/polskipawel/view/view.fxml"));
+        primaryStage.setTitle("Warehouse in JavaFX");
+        primaryStage.setScene(new Scene(root, 710, 640));
+        primaryStage.setResizable(false);
+        return primaryStage;
+    }
     /**
      * This button listnes for action and Initialize data to table view, or adds new equipment
      */
