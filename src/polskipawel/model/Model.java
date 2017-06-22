@@ -3,11 +3,12 @@ package polskipawel.model;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.Writer;
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by macbook on 01.05.2017.
@@ -20,7 +21,8 @@ public class Model {
     private ObservableList<Equipment> equipments = FXCollections.observableArrayList();
 
     /**
-     * Fildered equipments list which can be displayed in JavaFX's TableView when needed.
+     * Fildered equipments l
+     * ist which can be displayed in JavaFX's TableView when needed.
      */
     private ObservableList<Equipment> filteredEquipments = FXCollections.observableArrayList();
 
@@ -29,14 +31,13 @@ public class Model {
      */
     private ArrayList<String> equipmentsTypes = new ArrayList<>();
 
-    public Model() {
+    public Model() throws IOException {
 
         addTypesOfEquipmentsToList();
 
+
+
     }
-
-
-
 
 
 

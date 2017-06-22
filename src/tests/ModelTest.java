@@ -1,10 +1,12 @@
 package tests;
 
+import org.junit.Test;
 import polskipawel.model.Model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 
 /**
  * Created by macbook on 07.05.2017.
@@ -17,8 +19,8 @@ class ModelTest {
      */
 
 
-    @org.junit.jupiter.api.Test
-    void addTypesOfEquipmentsToList() {
+    @Test
+    void addTypesOfEquipmentsToList() throws IOException {
 
         Model model = new Model();
         ArrayList<String> equipmentsTypesTest = new ArrayList<>();
@@ -34,8 +36,8 @@ class ModelTest {
         assertEquals(equipmentsTypesTest, model.getEquipmentsTypes());
     }
 
-    @org.junit.jupiter.api.Test
-    void addEquipment() {
+    @Test
+    void addEquipment() throws IOException {
         Model model = new Model();
         model.addEquipment(1, "", "", "");
         assertEquals(1, model.getEquipments().size());
@@ -43,8 +45,8 @@ class ModelTest {
     }
 
 
-    @org.junit.jupiter.api.Test
-    void getLastId() {
+    @Test
+    void getLastId() throws IOException {
         Model model = new Model();
         int testing = 5;
         model.addEquipment(1, "", "", "");
@@ -53,8 +55,8 @@ class ModelTest {
         assertEquals(testing, model.getLastId());
     }
 
-    @org.junit.jupiter.api.Test
-    void removeEquipment() {
+    @Test
+    void removeEquipment() throws IOException {
         Model model = new Model();
 
         model.addEquipment(5, "", "", "");
@@ -65,7 +67,7 @@ class ModelTest {
         assertEquals(2, model.getEquipments().size());
     }
 
-    @org.junit.jupiter.api.Test
+    @Test
     void writeExcel() {
         // no idea how to test
     }

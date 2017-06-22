@@ -13,9 +13,9 @@ import javafx.stage.Stage;
 import polskipawel.model.Equipment;
 import polskipawel.model.Model;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Optional;
 
 import static javafx.scene.paint.Color.GREEN;
@@ -25,10 +25,14 @@ public class Controller {
 
     public Model model;
 
-    public Controller() {
+    public Controller() throws IOException {
         model = new Model();
+        connection();
 
     }
+
+
+
 
     @FXML
     public Button initializeAndAddButton;
@@ -73,7 +77,14 @@ public class Controller {
         primaryStage.setScene(new Scene(root, 710, 640));
         primaryStage.setResizable(false);
         return primaryStage;
+
+
     }
+
+
+
+
+
     /**
      * This button listnes for action and Initialize data to table view, or adds new equipment
      */
@@ -89,6 +100,84 @@ public class Controller {
             addNewEquipment();
 
         }
+
+    }
+
+
+
+    public void connection() throws IOException {
+
+
+
+        final String serverHost = "localhost";
+
+        Socket socketOfClient = null;
+        BufferedWriter os = null;
+        BufferedReader is = null;
+
+        try {
+
+            // Send a request to connect to the server is listening
+            // on machine 'localhost' port 9999.
+            socketOfClient = new Socket(serverHost, 9999);
+//
+            // Create output stream at the client (to send data to the server)
+            os = new BufferedWriter(new OutputStreamWriter(socketOfClient.getOutputStream()));
+
+
+            // Input stream at Client (Receive data from the server).
+            is = new BufferedReader(new InputStreamReader(socketOfClient.getInputStream()));
+
+
+            System.out.println();
+
+
+
+
+        } catch (UnknownHostException e) {
+            System.err.println("Don't know about host " + serverHost);
+            return;
+        } catch (IOException e) {
+            System.err.println("Couldn't get I/O for the connection to " + serverHost);
+            return;
+        }
+
+        try {
+
+            // Write data to the output stream of the Client Socket.
+            os.write("HELO");
+
+            // End of line
+            os.newLine();
+
+            // Flush data.
+            os.flush();
+            os.write("I am Tom Cat");
+            os.newLine();
+            os.flush();
+
+
+
+
+            // Read data sent from the server.
+            // By reading the input stream of the Client Socket.
+            String responseLine;
+            while ((responseLine = is.readLine()) != null) {
+                System.out.println("Server: " + responseLine);
+                if (responseLine.indexOf("OK") != -1) {
+                    break;
+                }
+            }
+
+            os.close();
+            is.close();
+            socketOfClient.close();
+        } catch (UnknownHostException e) {
+            System.err.println("Trying to connect to unknown host: " + e);
+        } catch (IOException e) {
+            System.err.println("IOException:  " + e);
+        }
+
     }
 
 
@@ -244,7 +333,8 @@ public class Controller {
     /**
      * add new equipment to list and table, checks if all inputs are correct - not empty, gives information to user
      */
-    public void addNewEquipment() {
+    public void addNewEquipment() throws IOException {
+
         informationLabel.setText("");
         try {
             if (textField.getText().equals("") || textField.getText().length() < 9) {
@@ -265,7 +355,7 @@ public class Controller {
     /**
      * Initialioze data from equipments list to table and changes status of buttons, fields
      */
-    public void initializeTableDataFromList() {
+    public void initializeTableDataFromList() throws IOException {
         fieldsAndButtonsDisabler(false);
         clearAllFields();
         id.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -276,6 +366,10 @@ public class Controller {
         typeChoiseField.getItems().addAll(model.getEquipmentsTypes());
         table.setItems(model.getEquipments());
         initializeAndAddButton.setText("Add equipment");
+
+
+
+
     }
 
     /**
