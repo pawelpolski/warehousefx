@@ -1,6 +1,7 @@
 package polskipawel.controller;
 
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -16,8 +17,8 @@ import polskipawel.model.Model;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Scanner;
 
 import static javafx.scene.paint.Color.GREEN;
 import static javafx.scene.paint.Color.RED;
@@ -27,7 +28,7 @@ public class Controller {
     public Model model;
 
     public Controller() throws IOException {
-        model = new Model();
+       model = new Model();
 
     }
 
@@ -35,6 +36,11 @@ public class Controller {
     Socket socket;
     BufferedWriter os = null;
     BufferedReader is = null;
+    ObjectOutputStream out = null;
+    ObjectInputStream in = null;
+
+
+    private ArrayList<String> equipmentsTypes = new ArrayList<>();
 
     @FXML
     public Button initializeAndAddButton;
@@ -69,36 +75,34 @@ public class Controller {
     @FXML
     public Button addFromTextArea;
 
-    /**
-     * view javafx initialization
-     */
-
-    public Stage startView(Stage primaryStage) throws IOException {
-        Parent root = FXMLLoader.load(getClass().getResource("/polskipawel/view/view.fxml"));
-        primaryStage.setTitle("Warehouse in JavaFX");
-        primaryStage.setScene(new Scene(root, 710, 640));
-        primaryStage.setResizable(false);
-        justConnect();
-        return primaryStage;
-    }
-
-
-
-
 
     /**
      * This button listnes for action and Initialize data to table view, or adds new equipment
      */
-    public void initializeAndAddButton(ActionEvent actionEvent) throws IOException {
+    public void initializeAndAddButton(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+
+        equipmentsTypes.add("Pace DCR7111");
+        equipmentsTypes.add("Cisco HD8485");
+        equipmentsTypes.add("Cisco HD8685");
+        equipmentsTypes.add("Horizon HD High");
+        equipmentsTypes.add("Horizon DVR High");
+        equipmentsTypes.add("Horizon DVR Low");
+        equipmentsTypes.add("Mediamudul CI+");
+        equipmentsTypes.add("Modem");
+        equipmentsTypes.add("Router");
+
+
         if (initializeAndAddButton.getText().equals("Initialize data")) {
 
+            setsPropertyValueOnTable();
+            justConnect();
 
-            System.out.println("test");
+            System.out.println("Zainicjalizowano dane");
 
 
-                os.write("test");
-                os.newLine();
-                os.flush();
+                //os.write("test");
+             //   os.newLine();
+              //  os.flush();
 
 
             // Read data sent from the server.
@@ -110,19 +114,17 @@ public class Controller {
 //                        break;
 
 
-//            os.close();
-//            is.close();
-//            socketOfClient.close();
 
-
-            getDataFromFileAndAddToTableList();
             initializeTableDataFromList();
+
             filterField.setDisable(false);
 
         } else { //Button has "Add equipment" value
 
             addNewEquipment();
 
+            String lineFromServer = is.readLine();
+            System.out.println(lineFromServer + "z przycisku");
         }
 
     }
@@ -130,19 +132,28 @@ public class Controller {
         try {
            socket = new Socket("localhost", 9999);
            writer = new PrintWriter(socket.getOutputStream());
-            System.out.println("połączono, obsluga sieci gotowa");
+            System.out.println("# Connected to server on: " + socket.getPort()+" port!");
             // Create output stream at the client (to send data to the server)
             os = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             // Input stream at Client (Receive data from the server).
             is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
+            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+            BufferedReader stdIn =
+                    new BufferedReader(
+                            new InputStreamReader(System.in));
+            BufferedWriter stdout =
+                    new BufferedWriter(
+                            new OutputStreamWriter(System.out));
+
 
             os.write("Hello");
             os.newLine();
             os.flush();
-
-
-
+            String lineFromServer = is.readLine();
+            System.out.println(">> Server sends back welcome msg: " + lineFromServer + " # # ");
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -339,7 +350,6 @@ public class Controller {
      * add new equipment to list and table, checks if all inputs are correct - not empty, gives information to user
      */
     public void addNewEquipment() throws IOException {
-
         informationLabel.setText("");
         try {
             if (textField.getText().equals("") || textField.getText().length() < 9) {
@@ -360,21 +370,25 @@ public class Controller {
     /**
      * Initialioze data from equipments list to table and changes status of buttons, fields
      */
-    public void initializeTableDataFromList() throws IOException {
+    public void initializeTableDataFromList() throws IOException, ClassNotFoundException {
+
+
         fieldsAndButtonsDisabler(false);
         clearAllFields();
+        typeChoiseField.getItems().addAll(equipmentsTypes);
+        table.setItems(model.getEquipments());
+        initializeAndAddButton.setText("Add equipment");
+    }
+
+    /**
+     * Initialioze data from equipments list to table and changes status of buttons, fields
+     */
+    public void setsPropertyValueOnTable() throws IOException {
         id.setCellValueFactory(new PropertyValueFactory<>("id"));
         serialNumber.setCellValueFactory(new PropertyValueFactory<>("serialNumber"));
         type.setCellValueFactory(new PropertyValueFactory<>("type"));
         status.setCellValueFactory(new PropertyValueFactory<>("status"));
         makeTableViewCentered();
-        typeChoiseField.getItems().addAll(model.getEquipmentsTypes());
-        table.setItems(model.getEquipments());
-        initializeAndAddButton.setText("Add equipment");
-
-
-
-
     }
 
     /**
@@ -388,19 +402,6 @@ public class Controller {
         id.setStyle("-fx-alignment: CENTER");
     }
 
-    /**
-     * Gets rows from Equipments.csv file which is our temporary database, and store each one in Equipment list
-     */
-    public void getDataFromFileAndAddToTableList() throws IOException {
-        BufferedReader csvFile = new BufferedReader(new FileReader("Equipments.csv"));
-        String mainRow = csvFile.readLine();
-        Object[] tempList = csvFile.lines().toArray();
-        for (int i = 0; i < tempList.length; i++) {
-            String row = tempList[i].toString();
-            String[] splitedRow = row.split(",");
-            model.addEquipment(Integer.parseInt(splitedRow[0]), splitedRow[1], splitedRow[2], splitedRow[3]);
-        }
-    }
 
     /**
      * Listner for excel (csv file) button action, if pressed starts method from model which saves table view into file
