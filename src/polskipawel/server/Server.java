@@ -17,8 +17,7 @@ public class Server {
 
 
         ServerSocket listener = null;
-        String line;
-        String line1;
+        String line;        String line1;
         BufferedReader is;
         BufferedWriter os;
         Socket socketForClient = null;
@@ -49,12 +48,14 @@ public class Server {
             os = new BufferedWriter(new OutputStreamWriter(socketForClient.getOutputStream()));
 
 
+
+
             ObjectOutputStream out = new ObjectOutputStream(socketForClient.getOutputStream());
             ObjectInputStream in = new ObjectInputStream(socketForClient.getInputStream());
 
 
             line1 = is.readLine();
-            System.out.println("<< Client sends welcome message: " + line1);
+            System.out.println("<< Client sends welcome message: " +line1);
             os.write("Welcome " + socketForClient.getRemoteSocketAddress());
             os.newLine();
             os.flush();
@@ -63,22 +64,50 @@ public class Server {
             while (true) {
                 // Read data to the server (sent from client).
                 line = is.readLine();
-                System.out.println("loop: " + line);
+                System.out.println("loop: " +line);
 
 
-                os.write(">> " + line);
 
-                os.newLine();
-
-                os.flush();
+                if (line.equals("GETEQTYPES")) {
 
 
-                // If users send QUIT (To end conversation).
-                if (line.equals("quit")) {
+                    equipmentsTypes.add("Pace DCR7111");
+                    equipmentsTypes.add("Cisco HD8485");
+                    equipmentsTypes.add("Cisco HD8685");
+                    equipmentsTypes.add("Horizon HD High");
+                    equipmentsTypes.add("Horizon DVR High");
+                    equipmentsTypes.add("Horizon DVR Low");
+                    equipmentsTypes.add("Mediamudul CI+");
+                    equipmentsTypes.add("Modem");
+                    equipmentsTypes.add("Router");
 
-                    break;
+                    out.writeObject(equipmentsTypes);
+
+                    out.flush();
+//                    os.write(">> OK");
+//                    os.newLine();
+//                    os.flush();
+                } else {
+                    os.write(">> " + line);
+
+                    os.newLine();
+
+                    os.flush();
                 }
-            }
+
+
+
+            // If users send QUIT (To end conversation).
+                if (line.equals("Hello2")) {
+                    os.write(">> OK");
+                    os.newLine();
+                    os.flush();
+
+
+                  //
+                      break;
+                }
+           }
 //
         } catch (IOException e) {
             System.out.println(e);
@@ -88,4 +117,4 @@ public class Server {
     }
 
 
-}
+    }

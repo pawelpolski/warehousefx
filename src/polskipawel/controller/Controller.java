@@ -28,7 +28,7 @@ public class Controller {
     public Model model;
 
     public Controller() throws IOException {
-       model = new Model();
+        model = new Model();
 
     }
 
@@ -38,6 +38,7 @@ public class Controller {
     BufferedReader is = null;
     ObjectOutputStream out = null;
     ObjectInputStream in = null;
+
 
 
     private ArrayList<String> equipmentsTypes = new ArrayList<>();
@@ -100,9 +101,9 @@ public class Controller {
             System.out.println("Zainicjalizowano dane");
 
 
-                //os.write("test");
-             //   os.newLine();
-              //  os.flush();
+            //os.write("test");
+            //   os.newLine();
+            //  os.flush();
 
 
             // Read data sent from the server.
@@ -112,7 +113,6 @@ public class Controller {
 //                    System.out.println("Server: " + responseLine);
 //                    if (responseLine.indexOf("OK") != -1) {
 //                        break;
-
 
 
             initializeTableDataFromList();
@@ -128,11 +128,12 @@ public class Controller {
         }
 
     }
-    public void justConnect(){
+
+    public void justConnect() {
         try {
-           socket = new Socket("localhost", 9999);
-           writer = new PrintWriter(socket.getOutputStream());
-            System.out.println("# Connected to server on: " + socket.getPort()+" port!");
+            socket = new Socket("localhost", 9999);
+            writer = new PrintWriter(socket.getOutputStream());
+            System.out.println("# Connected to server on: " + socket.getPort() + " port!");
             // Create output stream at the client (to send data to the server)
             os = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             // Input stream at Client (Receive data from the server).
@@ -194,7 +195,6 @@ public class Controller {
 //            System.err.println("IOException:  " + e);
 //        }
     }
-
 
 
     /**
@@ -332,7 +332,7 @@ public class Controller {
             } else {
                 String[] rows = textArea.getText().split("\n");
 
-                for (String equipment : rows){
+                for (String equipment : rows) {
                     table.setItems(model.addEquipment(model.getLastId() + 1, equipment, typeChoiseField.getValue().toString(), "in warehouse"));
                     clearAllFields();
                     informationLabel.setTextFill(GREEN);
