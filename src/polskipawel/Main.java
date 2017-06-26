@@ -29,7 +29,7 @@ public class Main extends Application {
        //controller.startView(primaryStage).show();
 
 
-        controller.justConnect();
+        //controller.justConnect();
     }
     /**
      * Start application

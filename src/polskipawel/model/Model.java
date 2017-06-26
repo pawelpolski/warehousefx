@@ -34,10 +34,20 @@ public class Model {
     public Model() throws IOException {
 
         addTypesOfEquipmentsToList();
-
+        getDataFromFileAndAddToTableList();
     }
 
+    public void getDataFromFileAndAddToTableList() throws IOException {
+        BufferedReader csvFile = new BufferedReader(new FileReader("Equipments.csv"));
+        String mainRow = csvFile.readLine();
+        Object[] tempList = csvFile.lines().toArray();
+        for (int i = 0; i < tempList.length; i++) {
+            String row = tempList[i].toString();
+            String[] splitedRow = row.split(",");
+            addEquipment(Integer.parseInt(splitedRow[0]), splitedRow[1], splitedRow[2], splitedRow[3]);
 
+        }
+    }
 
     /**
      * add fixed types of equipments to array list

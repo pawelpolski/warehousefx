@@ -2,13 +2,10 @@ package polskipawel.server;
 
 import polskipawel.model.Model;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 public class Server {
 
@@ -16,12 +13,15 @@ public class Server {
 
 
         Model theModel = new Model();
+        ArrayList<String> equipmentsTypes = new ArrayList<>();
+
 
         ServerSocket listener = null;
-        String line;        String line1;
+        String line;
+        String line1;
         BufferedReader is;
         BufferedWriter os;
-        Socket socketOfServer = null;
+        Socket socketForClient = null;
 
         // Try to open a server socket on port 9999
         // Note that we can't choose a port less than 1023 if we are not
@@ -36,25 +36,35 @@ public class Server {
         }
 
         try {
-            System.out.println("Server is waiting to accept user...");
+            System.out.println("# Server is waiting to accept user...");
+
+            //theModel.getDataFromFileAndAddToTableList();
 
             // Accept client connection request
             // Get new Socket at Server.
-            socketOfServer = listener.accept();
-            System.out.println("Accepted a client!");
-
+            socketForClient = listener.accept();
+            System.out.println("# Accepted a client on port: " + socketForClient.getPort());
             // Open input and output streams
-            is = new BufferedReader(new InputStreamReader(socketOfServer.getInputStream()));
-            os = new BufferedWriter(new OutputStreamWriter(socketOfServer.getOutputStream()));
+            is = new BufferedReader(new InputStreamReader(socketForClient.getInputStream()));
+            os = new BufferedWriter(new OutputStreamWriter(socketForClient.getOutputStream()));
+
+
+            ObjectOutputStream out = new ObjectOutputStream(socketForClient.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(socketForClient.getInputStream());
+
+
             line1 = is.readLine();
-            System.out.println("Client says: " +line1);
-            os.write("hello client");
+            System.out.println("<< Client sends welcome message: " + line1);
+            os.write("Welcome " + socketForClient.getRemoteSocketAddress());
             os.newLine();
             os.flush();
+
+
             while (true) {
                 // Read data to the server (sent from client).
                 line = is.readLine();
-                System.out.println("Client says: " +line);
+                System.out.println("loop: " + line);
+
 
                 os.write(">> " + line);
 
@@ -63,16 +73,12 @@ public class Server {
                 os.flush();
 
 
+                // If users send QUIT (To end conversation).
+                if (line.equals("quit")) {
 
-            // If users send QUIT (To end conversation).
-                if (line.equals("QUIT")) {
-                    os.write(">> OK");
-                    os.newLine();
-                    os.flush();
-                  //
-                    //  break;
+                    break;
                 }
-           }
+            }
 //
         } catch (IOException e) {
             System.out.println(e);
@@ -82,4 +88,4 @@ public class Server {
     }
 
 
-    }
+}
