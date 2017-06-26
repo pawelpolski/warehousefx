@@ -20,16 +20,22 @@ public class Main extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
+        Parent root = FXMLLoader.load(getClass().getResource("/polskipawel/view/view.fxml"));
+        primaryStage.setTitle("Warehouse in JavaFX");
+        primaryStage.setScene(new Scene(root, 710, 640));
+        primaryStage.setResizable(false);
+        primaryStage.show();
         Controller controller = new Controller();
-        controller.startView(primaryStage).show();
+       //controller.startView(primaryStage).show();
 
+
+        controller.justConnect();
     }
     /**
      * Start application
      */
     public static void main(String[] args) throws IOException {
         launch(args);
-
 
     }
 }

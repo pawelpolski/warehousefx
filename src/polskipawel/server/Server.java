@@ -18,7 +18,7 @@ public class Server {
         Model theModel = new Model();
 
         ServerSocket listener = null;
-        String line;
+        String line;        String line1;
         BufferedReader is;
         BufferedWriter os;
         Socket socketOfServer = null;
@@ -41,23 +41,25 @@ public class Server {
             // Accept client connection request
             // Get new Socket at Server.
             socketOfServer = listener.accept();
-            System.out.println("Accept a client!");
+            System.out.println("Accepted a client!");
 
             // Open input and output streams
             is = new BufferedReader(new InputStreamReader(socketOfServer.getInputStream()));
             os = new BufferedWriter(new OutputStreamWriter(socketOfServer.getOutputStream()));
-
-
+            line1 = is.readLine();
+            System.out.println("Client says: " +line1);
+            os.write("hello client");
+            os.newLine();
+            os.flush();
             while (true) {
                 // Read data to the server (sent from client).
                 line = is.readLine();
+                System.out.println("Client says: " +line);
 
-                // Write to socket of Server
-                // (Send to client)
                 os.write(">> " + line);
-                // End of line
+
                 os.newLine();
-                // Flush data.
+
                 os.flush();
 
 
@@ -67,7 +69,8 @@ public class Server {
                     os.write(">> OK");
                     os.newLine();
                     os.flush();
-                    break;
+                  //
+                    //  break;
                 }
            }
 //
