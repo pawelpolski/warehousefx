@@ -18,6 +18,7 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Optional;
 
 import static javafx.scene.paint.Color.GREEN;
@@ -34,14 +35,15 @@ public class Controller {
 
     PrintWriter writer;
     Socket socket;
-    BufferedWriter os = null;
+    PrintWriter os = null;
     BufferedReader is = null;
+    InputStreamReader iss = null;
+
     ObjectOutputStream out = null;
     ObjectInputStream in = null;
 
+    String lineFromServer = "";
 
-
-    private ArrayList<String> equipmentsTypes = new ArrayList<>();
 
     @FXML
     public Button initializeAndAddButton;
@@ -82,22 +84,13 @@ public class Controller {
      */
     public void initializeAndAddButton(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
 
-        equipmentsTypes.add("Pace DCR7111");
-        equipmentsTypes.add("Cisco HD8485");
-        equipmentsTypes.add("Cisco HD8685");
-        equipmentsTypes.add("Horizon HD High");
-        equipmentsTypes.add("Horizon DVR High");
-        equipmentsTypes.add("Horizon DVR Low");
-        equipmentsTypes.add("Mediamudul CI+");
-        equipmentsTypes.add("Modem");
-        equipmentsTypes.add("Router");
 
 
         if (initializeAndAddButton.getText().equals("Initialize data")) {
 
             setsPropertyValueOnTable();
             justConnect();
-
+            os.println("GETEQTYPES");
             System.out.println("Zainicjalizowano dane");
 
 
@@ -115,6 +108,10 @@ public class Controller {
 //                        break;
 
 
+
+            System.out.println(lineFromServer);
+
+//            System.out.println(in.readUTF());
             initializeTableDataFromList();
 
             filterField.setDisable(false);
@@ -122,9 +119,13 @@ public class Controller {
         } else { //Button has "Add equipment" value
 
             addNewEquipment();
+            os.println("GETEQ");
 
-            String lineFromServer = is.readLine();
-            System.out.println(lineFromServer + "z przycisku");
+            System.out.println(lineFromServer);
+
+//
+//            String lineFromServer = is.readLine();
+//            System.out.println(lineFromServer + "z przycisku");
         }
 
     }
@@ -135,12 +136,10 @@ public class Controller {
             writer = new PrintWriter(socket.getOutputStream());
             System.out.println("# Connected to server on: " + socket.getPort() + " port!");
             // Create output stream at the client (to send data to the server)
-            os = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            // Input stream at Client (Receive data from the server).
-            is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+            os = new PrintWriter(socket.getOutputStream(), true);
+            is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            iss = new InputStreamReader(socket.getInputStream());
 
             BufferedReader stdIn =
                     new BufferedReader(
@@ -150,10 +149,10 @@ public class Controller {
                             new OutputStreamWriter(System.out));
 
 
-            os.write("Hello");
-            os.newLine();
-            os.flush();
-            String lineFromServer = is.readLine();
+
+            os.println("Hello");
+
+            lineFromServer = is.readLine();
             System.out.println(">> Server sends back welcome msg: " + lineFromServer + " # # ");
 
         } catch (UnknownHostException e) {
@@ -375,7 +374,9 @@ public class Controller {
 
         fieldsAndButtonsDisabler(false);
         clearAllFields();
-        typeChoiseField.getItems().addAll(equipmentsTypes);
+
+        String[] temp = is.readLine().replace("[","").replace("]", "").split(", ");
+        typeChoiseField.getItems().addAll(temp);
         table.setItems(model.getEquipments());
         initializeAndAddButton.setText("Add equipment");
     }
