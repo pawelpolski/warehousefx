@@ -37,14 +37,9 @@ public class Controller {
     Socket socket;
     PrintWriter os = null;
     BufferedReader is = null;
-    InputStreamReader iss = null;
-
-    ObjectOutputStream out = null;
-    ObjectInputStream in = null;
-
     String lineFromServer = "";
 
-
+    ArrayList<String> equipmentsTypes = null;
     @FXML
     public Button initializeAndAddButton;
     @FXML
@@ -84,34 +79,12 @@ public class Controller {
      */
     public void initializeAndAddButton(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
 
-
-
         if (initializeAndAddButton.getText().equals("Initialize data")) {
 
             setsPropertyValueOnTable();
             justConnect();
             os.println("GETEQTYPES");
             System.out.println("Zainicjalizowano dane");
-
-
-            //os.write("test");
-            //   os.newLine();
-            //  os.flush();
-
-
-            // Read data sent from the server.
-            // By reading the input stream of the Client Socket.
-//                String responseLine;
-//                while ((responseLine = is.readLine()) != null) {
-//                    System.out.println("Server: " + responseLine);
-//                    if (responseLine.indexOf("OK") != -1) {
-//                        break;
-
-
-
-            System.out.println(lineFromServer);
-
-//            System.out.println(in.readUTF());
             initializeTableDataFromList();
 
             filterField.setDisable(false);
@@ -119,15 +92,9 @@ public class Controller {
         } else { //Button has "Add equipment" value
 
             addNewEquipment();
-            os.println("GETEQ");
 
-            System.out.println(lineFromServer);
-
-//
-//            String lineFromServer = is.readLine();
-//            System.out.println(lineFromServer + "z przycisku");
+            System.out.println(is.readLine());
         }
-
     }
 
     public void justConnect() {
@@ -139,17 +106,6 @@ public class Controller {
 
             os = new PrintWriter(socket.getOutputStream(), true);
             is = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            iss = new InputStreamReader(socket.getInputStream());
-
-            BufferedReader stdIn =
-                    new BufferedReader(
-                            new InputStreamReader(System.in));
-            BufferedWriter stdout =
-                    new BufferedWriter(
-                            new OutputStreamWriter(System.out));
-
-
-
             os.println("Hello");
 
             lineFromServer = is.readLine();
@@ -160,41 +116,26 @@ public class Controller {
         } catch (IOException e) {
             e.printStackTrace();
         }
-//        try {
-//
-//            // Write data to the output stream of the Client Socket.
-//            os.write("HELO");
-//
-//            // End of line
-//            os.newLine();
-//
-//            // Flush data.
-//            os.flush();
-//            os.write("I am Tom Cat");
-//            os.newLine();
-//            os.flush();
-
-//
-//            os.write(test);
-//            os.newLine();
-//            os.flush();
-//
-//
-//
-//            // Read data sent from the server.
-//            // By reading the input stream of the Client Socket.
-
-//
-////            os.close();
-////            is.close();
-////            socketOfClient.close();
-//        } catch (UnknownHostException e) {
-//            System.err.println("Trying to connect to unknown host: " + e);
-//        } catch (IOException e) {
-//            System.err.println("IOException:  " + e);
-//        }
     }
 
+
+    /**
+     * Initialioze data from equipments list to table and changes status of buttons, fields
+     */
+    public void initializeTableDataFromList() throws IOException, ClassNotFoundException {
+
+        fieldsAndButtonsDisabler(false);
+        clearAllFields();
+        equipmentsTypes = new ArrayList<>();
+        do {
+            System.out.println(is.readLine());
+        }
+        while (is.readLine().equals(null));
+
+        typeChoiseField.getItems().addAll(equipmentsTypes);
+        table.setItems(model.getEquipments());
+        initializeAndAddButton.setText("Add equipment");
+    }
 
     /**
      * Equipment can be edited via this button, you have to select row then type correct values and save/cancel
@@ -366,20 +307,6 @@ public class Controller {
         }
     }
 
-    /**
-     * Initialioze data from equipments list to table and changes status of buttons, fields
-     */
-    public void initializeTableDataFromList() throws IOException, ClassNotFoundException {
-
-
-        fieldsAndButtonsDisabler(false);
-        clearAllFields();
-
-        String[] temp = is.readLine().replace("[","").replace("]", "").split(", ");
-        typeChoiseField.getItems().addAll(temp);
-        table.setItems(model.getEquipments());
-        initializeAndAddButton.setText("Add equipment");
-    }
 
     /**
      * Initialioze data from equipments list to table and changes status of buttons, fields

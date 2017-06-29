@@ -26,10 +26,6 @@ public class Server {
         PrintWriter os;
         Socket socketForClient = null;
 
-        // Try to open a server socket on port 9999
-        // Note that we can't choose a port less than 1023 if we are not
-        // privileged users (root)
-
         try {
             listener = new ServerSocket(9999);
         } catch (IOException e) {
@@ -40,7 +36,6 @@ public class Server {
         try {
             System.out.println("# Server is waiting to accept user...");
 
-            //theModel.getDataFromFileAndAddToTableList();
 
             // Accept client connection request
             // Get new Socket at Server.
@@ -51,13 +46,14 @@ public class Server {
             os = new PrintWriter(socketForClient.getOutputStream(), true);
 
 
-            line1 = is.readLine();
-            System.out.println("<< Client sends welcome message: " +line1);
-            os.println("Welcome " + socketForClient.getRemoteSocketAddress());
+
 
 
 
             while (true) {
+                line1 = is.readLine();
+                System.out.println("<< Client sends welcome message: " +line1);
+                os.println("Welcome " + socketForClient.getRemoteSocketAddress());
                 // Read data to the server (sent from client).
                 line = is.readLine();
                 System.out.println("loop: " +line);
@@ -76,33 +72,33 @@ public class Server {
                     equipmentsTypes.add("Mediamudul CI+");
                     equipmentsTypes.add("Modem");
                     equipmentsTypes.add("Router");
-                    os.println(equipmentsTypes);
+
+                    for (String eq : equipmentsTypes ){
+                        os.println(eq);
+                    }
+
+
 
                 }
 
 
                 if (line.equals("GETEQ")) {
 
-                    os.write("test");
+                    os.println("test");
 
                 }
 
-                os.println(">> " + line);
 
-
-
-
-
-            // If users send QUIT (To end conversation).
+                // If users send QUIT (To end conversation).
                 if (line.equals("Hello2")) {
                     os.println(">> OK");
 
 
 
-                  //
-                      break;
+                    //
+                    break;
                 }
-           }
+            }
 //
         } catch (IOException e) {
             System.out.println(e);
@@ -113,4 +109,4 @@ public class Server {
     }
 
 
-    }
+}
